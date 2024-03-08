@@ -1,0 +1,12 @@
+apiVersion: email-alerts.koperator.rmatto/v1
+kind: EmailSenderConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: emailsenderconfig
+    app.kubernetes.io/instance: emailsenderconfig-sample
+    app.kubernetes.io/part-of: kubernetes-email-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: kubernetes-email-operator
+  name: emailsenderconfig-sample
+spec:
+  # TODO(user): Add fields here
