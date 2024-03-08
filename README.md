@@ -1,0 +1,1 @@
+# kubernetes-email-operator
