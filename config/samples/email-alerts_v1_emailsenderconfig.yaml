@@ -9,5 +9,5 @@ metadata:
     app.kubernetes.io/created-by: kubernetes-email-operator
   name: emailsenderconfig-sample
 spec:
-  apiToken: string
-  senderEmail: string
+  apiToken: mlsn.37c19bcaff584aa39c7c8300ce1bd16f2d904e8f3749ab40d0b8780d6bbe1f6f 
+  senderEmail: info@trial-pq3enl66m38l2vwr.mlsender.net 
