@@ -9,4 +9,5 @@ metadata:
     app.kubernetes.io/created-by: kubernetes-email-operator
   name: emailsenderconfig-sample
 spec:
-  # TODO(user): Add fields here
+  apiToken: string
+  senderEmail: string

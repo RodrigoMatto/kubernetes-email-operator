@@ -23,19 +23,36 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+const (
+     SUCCESS = "Success"
+     FAILED = "Failed"
+)
+
 // EmailSpec defines the desired state of Email
 type EmailSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Email. Edit email_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// This should be a description for SenderConfigRef 
+	SenderConfigRef string `json:"senderConfigRef"`
+	// This should be a description for RecipientEmail
+	RecipientEmail  string `json:"recipientEmail"`
+	// This should be a description for the Subject
+	Subject         string `json:"subject"`
+	// This should be a description for the Body of the email
+	Body            string `json:"body"`
 }
 
 // EmailStatus defines the observed state of Email
 type EmailStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+
+	// This should be a description for the DeliveryStatus
+	DeliveryStatus string `json:"deliveryStatus"`
+	// This should be a description for the MessageID
+	MessageID      string `json:"messageID"`
 }
 
 //+kubebuilder:object:root=true

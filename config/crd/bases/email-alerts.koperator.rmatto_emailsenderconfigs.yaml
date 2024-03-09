@@ -1,0 +1,55 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: emailsenderconfigs.email-alerts.koperator.rmatto
+spec:
+  group: email-alerts.koperator.rmatto
+  names:
+    kind: EmailSenderConfig
+    listKind: EmailSenderConfigList
+    plural: emailsenderconfigs
+    singular: emailsenderconfig
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: EmailSenderConfig is the Schema for the emailsenderconfigs API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EmailSenderConfigSpec defines the desired state of EmailSenderConfig
+            properties:
+              apitoken:
+                description: Description for the apiToken
+                type: string
+              senderemail:
+                description: Description for the senderEmail
+                type: string
+            required:
+            - apitoken
+            - senderemail
+            type: object
+          status:
+            description: 'EmailSenderConfigStatus defines the observed state of EmailSenderConfig
+              Important: If you read this, i own you a cup of coffe.'
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

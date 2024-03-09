@@ -1,0 +1,72 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: emails.email-alerts.koperator.rmatto
+spec:
+  group: email-alerts.koperator.rmatto
+  names:
+    kind: Email
+    listKind: EmailList
+    plural: emails
+    singular: email
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Email is the Schema for the emails API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EmailSpec defines the desired state of Email
+            properties:
+              body:
+                description: This should be a description for the Body of the email
+                type: string
+              recipientEmail:
+                description: This should be a description for RecipientEmail
+                type: string
+              senderConfigRef:
+                description: This should be a description for SenderConfigRef
+                type: string
+              subject:
+                description: This should be a description for the Subject
+                type: string
+            required:
+            - body
+            - recipientEmail
+            - senderConfigRef
+            - subject
+            type: object
+          status:
+            description: EmailStatus defines the observed state of Email
+            properties:
+              deliveryStatus:
+                description: This should be a description for the DeliveryStatus
+                type: string
+              messageID:
+                description: This should be a description for the MessageID
+                type: string
+            required:
+            - deliveryStatus
+            - messageID
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
