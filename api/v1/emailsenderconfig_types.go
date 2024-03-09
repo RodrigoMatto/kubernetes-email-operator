@@ -24,26 +24,26 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // To handle errors en the status
-
+/*
 const (
-    SUCCESS = "Success"
-    FAILED = "Failed"
+	SUCCESS = "Success"
+	FAILED  = "Failed"
 )
-
+*/
 
 // EmailSenderConfigSpec defines the desired state of EmailSenderConfig
 type EmailSenderConfigSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Description for the apiToken 
-        apiToken string         `json:"apitoken"`
-	// Description for the senderEmail 
-        senderEmail string      `json:"senderemail"`
+	// Description for the apiToken
+	ApiToken string `json:"apiToken"`
+	// Description for the senderEmail
+	SenderEmail string `json:"senderEmail"`
 }
 
 // EmailSenderConfigStatus defines the observed state of EmailSenderConfig
-// Important: If you read this, i own you a cup of coffe. 
+// Important: If you read this, i own you a cup of coffe.
 type EmailSenderConfigStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file

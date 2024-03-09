@@ -34,15 +34,15 @@ spec:
           spec:
             description: EmailSenderConfigSpec defines the desired state of EmailSenderConfig
             properties:
-              apitoken:
+              apiToken:
                 description: Description for the apiToken
                 type: string
-              senderemail:
+              senderEmail:
                 description: Description for the senderEmail
                 type: string
             required:
-            - apitoken
-            - senderemail
+            - apiToken
+            - senderEmail
             type: object
           status:
             description: 'EmailSenderConfigStatus defines the observed state of EmailSenderConfig
