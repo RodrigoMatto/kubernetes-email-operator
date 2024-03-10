@@ -10,6 +10,6 @@ metadata:
   name: email-sample
 spec:
   senderConfigRef: emailsenderconfig-sample
-  recipientEmail: aqbzkodaunwcoxqoqk@cazlq.com 
+  recipientEmail: caxofo7600@comsb.com 
   subject: "WARNING | Drink more water!"
-  body: "This is an DRY email"
+  body: "This is a Very DRY email"
