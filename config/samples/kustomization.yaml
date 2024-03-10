@@ -1,5 +1,6 @@
 ## Append samples of your project ##
 resources:
+- email-alerts_v1_emailsenderconfig_mailersend.yaml
+- email-alerts_v1_emailsenderconfig_mailgun.yaml
 - email-alerts_v1_email.yaml
-- email-alerts_v1_emailsenderconfig.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

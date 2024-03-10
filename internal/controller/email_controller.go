@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,6 +32,7 @@ import (
 
 	emailalertsv1 "github.com/RodrigoMatto/kubernetes-email-operator/api/v1"
 	"github.com/mailersend/mailersend-go"
+	"github.com/mailgun/mailgun-go"
 )
 
 // var log = ctrl.Log.WithName("controller_email")
@@ -91,6 +93,10 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return reconcile.Result{}, err02
 	}
 
+	// Save the email provider from the senderConfig
+	emailProvider := senderConfig.Spec.EmailProvider
+	// Logging the email provider
+	log.Info("SenderConfigRef | Email Provider", "provider", senderConfig.Spec.EmailProvider)
 	// Logging to troubleshoot valid email address
 	log.Info("SenderConfigRef | Sender Email Address", "email", senderConfig.Spec.SenderEmail)
 	// Set the sender's email address using the senderConfig
@@ -102,31 +108,72 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	/*
 	   MailerSend Config
 	*/
+	if emailProvider == "MailerSend" {
+		log.Info("Email Provider", "provider", emailProvider)
+		// Using OS ENV for now, needs to change to secrets
+		ms := mailersend.NewMailersend(os.Getenv("MAILERSEND_API_KEY"))
 
-	// Using OS ENV for now, needs to change to secrets
-	ms := mailersend.NewMailersend(os.Getenv("MAILERSEND_API_KEY"))
+		message := ms.Email.NewMessage()
+		// Use the from variable to setup the SetFrom
+		message.SetFrom(from)
+		message.SetRecipients([]mailersend.Recipient{{Email: email.Spec.RecipientEmail}})
+		message.SetSubject(email.Spec.Subject)
+		message.SetHTML(email.Spec.Body)
 
-	message := ms.Email.NewMessage()
-	// Use the from variable to setup the SetFrom
-	message.SetFrom(from)
-	message.SetRecipients([]mailersend.Recipient{{Email: email.Spec.RecipientEmail}})
-	message.SetSubject(email.Spec.Subject)
-	message.SetHTML(email.Spec.Body)
+		// Send the email, retrive response and error
+		res, err := ms.Email.Send(context.Background(), message)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 
-	// Send the email, retrive response and error
-	res, err := ms.Email.Send(context.Background(), message)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
+		// Update status of Email resource to indicate successful delivery
+		email.Status.DeliveryStatus = "Delivered"
+		email.Status.MessageID = res.Header.Get("X-Message-Id")
+		if err := r.Status().Update(context.TODO(), email); err != nil {
+			return reconcile.Result{}, err
+		}
 
-	// Log the Email
-	log.Info("MailerSend Config | Sending Email", "MessageID", email.Status.MessageID)
+		// Log the Email
+		log.Info("MailerSend | Email Sended", "MessageID", email.Status.MessageID)
 
-	// Update status of Email resource to indicate successful delivery
-	email.Status.DeliveryStatus = "Delivered"
-	email.Status.MessageID = res.Header.Get("X-Message-Id")
-	if err := r.Status().Update(context.TODO(), email); err != nil {
-		return reconcile.Result{}, err
+		/*
+		   Mailgun Config
+		*/
+	} else if emailProvider == "Mailgun" {
+		log.Info("Email Provider", "provider", emailProvider)
+		// Using OS ENV for now, needs to change to secrets
+		mg := mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_API_KEY"))
+
+		m := mg.NewMessage(
+			senderConfig.Spec.SenderEmail,
+			email.Spec.Subject,
+			email.Spec.Body,
+			email.Spec.RecipientEmail,
+		)
+
+		// Send the email, retrive response and error
+		_, id, err := mg.Send(m)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// Update status of Email resource to indicate successful delivery
+		email.Status.DeliveryStatus = "Delivered"
+		email.Status.MessageID = id
+		if err := r.Status().Update(context.TODO(), email); err != nil {
+			return reconcile.Result{}, err
+		}
+
+		// Log the Email
+		log.Info("Mailgun | Email Sended", "MessageID", email.Status.MessageID)
+
+		/*
+		   Handle unkown providers
+		*/
+	} else {
+		// Print an error message for unknown email providers
+		log.Error(nil, "Unknown Email Provider, please use either MailerSend or Mailgun.", "provider", emailProvider)
+		return reconcile.Result{}, fmt.Errorf("unknown email provider: %s", emailProvider)
 	}
 	return ctrl.Result{}, nil
 }

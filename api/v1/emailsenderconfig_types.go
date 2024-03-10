@@ -36,6 +36,8 @@ type EmailSenderConfigSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// Description for the emailProvider
+	EmailProvider string `json:"emailProvider"`
 	// Description for the apiToken
 	ApiToken string `json:"apiToken"`
 	// Description for the senderEmail

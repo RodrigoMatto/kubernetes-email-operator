@@ -37,11 +37,15 @@ spec:
               apiToken:
                 description: Description for the apiToken
                 type: string
+              emailProvider:
+                description: Description for the emailProvider
+                type: string
               senderEmail:
                 description: Description for the senderEmail
                 type: string
             required:
             - apiToken
+            - emailProvider
             - senderEmail
             type: object
           status:
