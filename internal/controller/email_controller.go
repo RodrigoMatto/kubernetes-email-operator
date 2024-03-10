@@ -68,6 +68,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	err := r.Get(context.TODO(), req.NamespacedName, email)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			// This keeps getting printed, why? it DID found the resource.
 			log.Info("Email resource not found", "Namespace", req.Namespace, "Name", req.Name)
 			return reconcile.Result{}, nil
 		}
@@ -91,8 +92,8 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 
 	// Logging to troubleshoot valid email address
-	log.Info("Sender Email Address", "email", senderConfig.Spec.SenderEmail)
-	// Now, we set the sender's email address using the senderConfig
+	log.Info("SenderConfigRef | Sender Email Address", "email", senderConfig.Spec.SenderEmail)
+	// Set the sender's email address using the senderConfig
 	from := mailersend.From{
 		Name:  "Rodrigo Matto",
 		Email: senderConfig.Spec.SenderEmail,
@@ -112,14 +113,14 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	message.SetSubject(email.Spec.Subject)
 	message.SetHTML(email.Spec.Body)
 
-	// Send the email
+	// Send the email, retrive response and error
 	res, err := ms.Email.Send(context.Background(), message)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	// Log the Email
-	log.Info("Sending Email", "MessageID", email.Status.MessageID)
+	log.Info("MailerSend Config | Sending Email", "MessageID", email.Status.MessageID)
 
 	// Update status of Email resource to indicate successful delivery
 	email.Status.DeliveryStatus = "Delivered"
@@ -127,7 +128,6 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if err := r.Status().Update(context.TODO(), email); err != nil {
 		return reconcile.Result{}, err
 	}
-
 	return ctrl.Result{}, nil
 }
 
