@@ -10,5 +10,5 @@ metadata:
   name: emailsenderconfig-mailgun
 spec:
   emailProvider: Mailgun
-  apiToken: changeit 
+  apiToken:
   senderEmail: mailgun@sandboxacce5f90f37f4c5bbcbbf38a5b3e1dc0.mailgun.org

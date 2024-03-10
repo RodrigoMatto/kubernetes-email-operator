@@ -19,13 +19,13 @@ package controller
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -124,12 +124,35 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 
 	/*
+	   Manage Api key as secrets reference
+	*/
+
+	// Fetch the secret
+	secret := &corev1.Secret{}
+	err = r.Client.Get(context.Background(), types.NamespacedName{Name: "email-operator-secrets", Namespace: email.Namespace}, secret)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Handle case where the secret doesn't exist
+			return reconcile.Result{}, fmt.Errorf("secret email-operator-secret not found")
+		}
+		return reconcile.Result{}, err
+	}
+
+	// Extract the data from the secret
+	MAILERSEND_API_KEY := string(secret.Data["mailersend-api-key"])
+	MAILGUN_API_KEY := string(secret.Data["mailgun-api-key"])
+	MAILGUN_DOMAIN := string(secret.Data["mailgun-domain"])
+	log.Info("MailerSend", "Api", MAILERSEND_API_KEY)
+	log.Info("Mailgun", "Api", MAILGUN_API_KEY)
+	log.Info("Mailgun", "Domain", MAILGUN_DOMAIN)
+
+	/*
 	   MailerSend Config
 	*/
 	if emailProvider == "MailerSend" {
 		log.Info("Email Provider", "provider", emailProvider)
 		// Using OS ENV for now, needs to change to secrets
-		ms := mailersend.NewMailersend(os.Getenv("MAILERSEND_API_KEY"))
+		ms := mailersend.NewMailersend(MAILERSEND_API_KEY)
 
 		message := ms.Email.NewMessage()
 		// Use the from variable to setup the SetFrom
@@ -158,7 +181,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	} else if emailProvider == "Mailgun" {
 		log.Info("Email Provider", "provider", emailProvider)
 		// Using OS ENV for now, needs to change to secrets
-		mg := mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_API_KEY"))
+		mg := mailgun.NewMailgun(MAILGUN_DOMAIN, MAILGUN_API_KEY)
 
 		m := mg.NewMessage(
 			fmt.Sprintf("Rodrigo Matto <%s>", senderConfig.Spec.SenderEmail),

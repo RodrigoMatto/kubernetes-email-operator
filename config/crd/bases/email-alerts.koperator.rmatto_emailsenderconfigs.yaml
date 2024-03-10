@@ -44,7 +44,6 @@ spec:
                 description: Description for the senderEmail
                 type: string
             required:
-            - apiToken
             - emailProvider
             - senderEmail
             type: object

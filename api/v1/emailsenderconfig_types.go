@@ -39,7 +39,7 @@ type EmailSenderConfigSpec struct {
 	// Description for the emailProvider
 	EmailProvider string `json:"emailProvider"`
 	// Description for the apiToken
-	ApiToken string `json:"apiToken"`
+	ApiToken *string `json:"apiToken,omitempty"` //Modified to make the apiToken Spec optional, will add logic to the controller to override the secrets if the apiToken is used.
 	// Description for the senderEmail
 	SenderEmail string `json:"senderEmail"`
 }

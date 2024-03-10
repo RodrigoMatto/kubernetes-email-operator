@@ -10,5 +10,5 @@ metadata:
   name: emailsenderconfig-mailersend
 spec:
   emailProvider: MailerSend
-  apiToken: changeit 
+  apiToken:
   senderEmail: info@trial-pxkjn4110054z781.mlsender.net 
