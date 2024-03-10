@@ -58,6 +58,9 @@ spec:
               deliveryStatus:
                 description: This should be a description for the DeliveryStatus
                 type: string
+              lastResourceVersion:
+                description: Using ResourceVersion to keep track of changes
+                type: string
               messageID:
                 description: This should be a description for the MessageID
                 type: string

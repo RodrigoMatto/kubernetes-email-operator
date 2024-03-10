@@ -66,6 +66,9 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	log := logger.WithValues("Namespace", req.Namespace, "Name", req.Name)
 
+	/*
+	   Email
+	*/
 	email := &emailalertsv1.Email{}
 	err := r.Get(context.TODO(), req.NamespacedName, email)
 	if err != nil {
@@ -76,6 +79,22 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		}
 		log.Error(err, "Failed to get Email resource", "Namespace", req.Namespace, "Name", req.Name)
 		return reconcile.Result{}, err
+	}
+	/*
+	   Validate the needs for reconciliation
+	*/
+
+	if email.Status.LastResourceVersion != email.ObjectMeta.ResourceVersion {
+		// Resource has been updated since the last reconciliation.
+		log.Info("LastResoureVersion ", "number", email.Status.LastResourceVersion)
+		log.Info("NewResoureVersion ", "number", email.ObjectMeta.ResourceVersion)
+		email.Status.DeliveryStatus = "Pending"
+
+	}
+
+	if email.Status.DeliveryStatus == "Delivered" {
+		// We already sent a message, so skip reconciliation
+		return ctrl.Result{}, nil
 	}
 
 	/*
@@ -97,7 +116,6 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	emailProvider := senderConfig.Spec.EmailProvider
 	// Logging the email provider
 	log.Info("SenderConfigRef | Email Provider", "provider", senderConfig.Spec.EmailProvider)
-	// Logging to troubleshoot valid email address
 	log.Info("SenderConfigRef | Sender Email Address", "email", senderConfig.Spec.SenderEmail)
 	// Set the sender's email address using the senderConfig
 	from := mailersend.From{
@@ -129,9 +147,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		// Update status of Email resource to indicate successful delivery
 		email.Status.DeliveryStatus = "Delivered"
 		email.Status.MessageID = res.Header.Get("X-Message-Id")
-		if err := r.Status().Update(context.TODO(), email); err != nil {
-			return reconcile.Result{}, err
-		}
+		log.Info("MailerSend", "DeliveryStatus", email.Status.DeliveryStatus, "ID", res.Header.Get("X-Message-Id"))
 
 		// Log the Email
 		log.Info("MailerSend | Email Sended", "MessageID", email.Status.MessageID)
@@ -145,7 +161,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		mg := mailgun.NewMailgun(os.Getenv("MAILGUN_DOMAIN"), os.Getenv("MAILGUN_API_KEY"))
 
 		m := mg.NewMessage(
-			senderConfig.Spec.SenderEmail,
+			fmt.Sprintf("Rodrigo Matto <%s>", senderConfig.Spec.SenderEmail),
 			email.Spec.Subject,
 			email.Spec.Body,
 			email.Spec.RecipientEmail,
@@ -160,9 +176,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		// Update status of Email resource to indicate successful delivery
 		email.Status.DeliveryStatus = "Delivered"
 		email.Status.MessageID = id
-		if err := r.Status().Update(context.TODO(), email); err != nil {
-			return reconcile.Result{}, err
-		}
+		log.Info("Mailgun", "DeliveryStatus", email.Status.DeliveryStatus, "ID", id)
 
 		// Log the Email
 		log.Info("Mailgun | Email Sended", "MessageID", email.Status.MessageID)
@@ -175,6 +189,12 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		log.Error(nil, "Unknown Email Provider, please use either MailerSend or Mailgun.", "provider", emailProvider)
 		return reconcile.Result{}, fmt.Errorf("unknown email provider: %s", emailProvider)
 	}
+
+	// Resource Version
+	log.Info("Return | LastResoureVersion ", "number", email.Status.LastResourceVersion)
+	log.Info("Return | NewResoureVersion ", "number", email.ObjectMeta.ResourceVersion)
+	email.Status.LastResourceVersion = email.ObjectMeta.ResourceVersion
+
 	return ctrl.Result{}, nil
 }
 

@@ -54,6 +54,8 @@ type EmailStatus struct {
 	DeliveryStatus string `json:"deliveryStatus"`
 	// This should be a description for the MessageID
 	MessageID string `json:"messageID"`
+	// Using ResourceVersion to keep track of changes
+	LastResourceVersion string `json:"lastResourceVersion,omitempty"`
 }
 
 //+kubebuilder:object:root=true
