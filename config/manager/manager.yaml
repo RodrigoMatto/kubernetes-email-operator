@@ -14,12 +14,12 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
-  namespace: system
+  name: email-operator
+  namespace: default
   labels:
     control-plane: controller-manager
     app.kubernetes.io/name: deployment
-    app.kubernetes.io/instance: controller-manager
+    app.kubernetes.io/instance: email-operator
     app.kubernetes.io/component: manager
     app.kubernetes.io/created-by: kubernetes-email-operator
     app.kubernetes.io/part-of: kubernetes-email-operator
@@ -93,10 +93,10 @@ spec:
         # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
         resources:
           limits:
-            cpu: 500m
-            memory: 128Mi
+            cpu: 800m
+            memory: 256Mi
           requests:
             cpu: 10m
             memory: 64Mi
-      serviceAccountName: controller-manager
+      serviceAccountName: email-operator
       terminationGracePeriodSeconds: 10
