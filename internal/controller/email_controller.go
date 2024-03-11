@@ -133,7 +133,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Handle case where the secret doesn't exist
-			return reconcile.Result{}, fmt.Errorf("secret email-operator-secret not found")
+			return reconcile.Result{}, fmt.Errorf("secret email-operator-secrets not found")
 		}
 		return reconcile.Result{}, err
 	}
@@ -142,6 +142,7 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	MAILERSEND_API_KEY := string(secret.Data["mailersend-api-key"])
 	MAILGUN_API_KEY := string(secret.Data["mailgun-api-key"])
 	MAILGUN_DOMAIN := string(secret.Data["mailgun-domain"])
+        // Printing just to validate the controller is able to read de secret 
 	log.Info("MailerSend", "Api", MAILERSEND_API_KEY)
 	log.Info("Mailgun", "Api", MAILGUN_API_KEY)
 	log.Info("Mailgun", "Domain", MAILGUN_DOMAIN)
@@ -172,6 +173,14 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		email.Status.MessageID = res.Header.Get("X-Message-Id")
 		log.Info("MailerSend", "DeliveryStatus", email.Status.DeliveryStatus, "ID", res.Header.Get("X-Message-Id"))
 
+		// Persist changes to the API
+		if email.Status.MessageID != res.Header.Get("X-Message-Id") {
+			if err := r.Client.Status().Update(context.TODO(), email); err != nil {
+				return reconcile.Result{}, err
+			}
+			return reconcile.Result{}, err
+		}
+
 		// Log the Email
 		log.Info("MailerSend | Email Sended", "MessageID", email.Status.MessageID)
 
@@ -201,6 +210,13 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		email.Status.MessageID = id
 		log.Info("Mailgun", "DeliveryStatus", email.Status.DeliveryStatus, "ID", id)
 
+		// Persist changes to the API
+		if email.Status.MessageID != id {
+			if err := r.Client.Status().Update(context.TODO(), email); err != nil {
+				return reconcile.Result{}, err
+			}
+			return reconcile.Result{}, err
+		}
 		// Log the Email
 		log.Info("Mailgun | Email Sended", "MessageID", email.Status.MessageID)
 
@@ -216,7 +232,6 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	// Resource Version
 	log.Info("Return | LastResoureVersion ", "number", email.Status.LastResourceVersion)
 	log.Info("Return | NewResoureVersion ", "number", email.ObjectMeta.ResourceVersion)
-	email.Status.LastResourceVersion = email.ObjectMeta.ResourceVersion
 
 	return ctrl.Result{}, nil
 }
