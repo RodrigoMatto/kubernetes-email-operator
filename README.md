@@ -10,7 +10,7 @@ The **Kubernetes Email Operator** is a Kubernetes operator designed to manage th
 
 ## Prerequisites
 
-Before using or updating the Kubernetes Email Operator, ensure you have the following prerequisites installed and configured:
+Before using the Kubernetes Email Operator, ensure you have the following prerequisites installed and configured:
 
 - Kubernetes cluster
 - `kubectl` CLI installed and configured to access your cluster
@@ -18,6 +18,7 @@ Before using or updating the Kubernetes Email Operator, ensure you have the foll
 - Go
 - operator-sdk
 - make
+- DockerHub account
 
 ## Installation
 
